@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>GreenBite — Recipes</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container nav">
+            <div class="brand">GreenBite</div>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="recipes.html">Recipes</a>
+                <a href="calculator.html">Calculator</a>
+                <a href="workouts.html">Workouts</a>
+                <a href="mindfulness.html">Mindfulness</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <button class="hamburger btn">☰</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Healthy Recipes</h2>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+                <input id="search" class="input" placeholder="Search recipes by name">
+                <select id="category" class="input">
+          <option value="">All Categories</option>
+        </select>
+            </div>
+            <div id="recipes-grid" class="grid"></div>
+        </section>
+    </main>
+
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content"></div>
+    </div>
+    <script src="js/common.js"></script>
+    <script src="js/recipes-data.js"></script>
+    <script>
+        const grid = document.getElementById('recipes-grid');
+        const catSel = document.getElementById('category');
+        const searchInput = document.getElementById('search');
+
+        const cats = [...new Set(RECIPES.map(r => r.category))];
+        cats.forEach(c => {
+            let o = document.createElement('option');
+            o.value = c;
+            o.innerText = c;
+            catSel.appendChild(o);
+        });
+
+        function showRecipes(list) {
+            grid.innerHTML = '';
+            list.forEach(r => {
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.innerHTML = `
+          <img src="${r.img}" alt="${r.title}" style="width:100%;height:140px;object-fit:cover;border-radius:8px 8px 0 0">
+          <h4>${r.title}</h4>
+          <p style="color:var(--muted)">${r.desc}</p>
+          <button class="btn open-btn" data-id="${r.id}">Open recipe</button>
+        `;
+                grid.appendChild(el);
+            });
+
+            document.querySelectorAll('.open-btn').forEach(b => {
+                b.addEventListener('click', e => {
+                    const id = e.target.dataset.id;
+                    openModal(RECIPES.find(x => x.id === id));
+                });
+            });
+        }
+
+        function openModal(recipe) {
+            const modal = document.getElementById('recipe-modal');
+            const content = modal.querySelector('.modal-content');
+            content.innerHTML = `
+        <button style="float:right" class="btn close-modal">Close</button>
+        <h3>${recipe.title}</h3>
+        <p>${recipe.desc}</p>
+        <h4>Ingredients</h4>
+        <ul>${recipe.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
+        <h4>Steps</h4>
+        <ol>${recipe.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        <h4>Nutrition</h4>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><th style="text-align:left">Calories</th><td>${recipe.nutrition.calories} kcal</td></tr>
+          <tr><th style="text-align:left">Carbs</th><td>${recipe.nutrition.carbs} g</td></tr>
+          <tr><th style="text-align:left">Protein</th><td>${recipe.nutrition.protein} g</td></tr>
+          <tr><th style="text-align:left">Fat</th><td>${recipe.nutrition.fat} g</td></tr>
+        </table>
+      `;
+      modal.classList.add('show');
+      content.querySelector('.close-modal').addEventListener('click', ()=> modal.classList.remove('show'));
+    }
+
+    function filterRecipes(){
+      const s = searchInput.value.trim().toLowerCase();
+      const c = catSel.value;
+      const filtered = RECIPES.filter(r=>{
+        const matchesText = r.title.toLowerCase().includes(s);
+        const matchesCat = c? r.category === c : true;
+        return matchesText && matchesCat;
+      });
+      showRecipes(filtered);
+    }
+
+    searchInput.addEventListener('input', filterRecipes);
+    catSel.addEventListener('change', filterRecipes);
+
+    showRecipes(RECIPES);
+    </script>
+</body>
+
+</html>

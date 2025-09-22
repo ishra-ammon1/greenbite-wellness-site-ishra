@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Workouts</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container nav">
+            <div class="brand">GreenBite</div>
+            <nav class="nav-links">
+                <a href="index.html">Home</a><a href="workouts.html">Workouts</a><a href="calculator.html">Calculator</a>
+            </nav><button class="hamburger btn">☰</button></div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Workout Generator</h2>
+            <div class="form-row">
+                <select id="bodypart" class="input">
+          <option value="full">Full body</option><option value="arms">Arms</option><option value="legs">Legs</option>
+        </select>
+                <select id="equipment" class="input">
+          <option value="none">None</option><option value="dumbbells">Dumbbells</option><option value="band">Resistance band</option>
+        </select>
+                <button id="gen-btn" class="btn">Generate</button>
+            </div>
+
+            <div id="plan" style="margin-top:12px"></div>
+            <div id="timer" style="margin-top:12px"></div>
+        </section>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        const WORKOUTS = {
+            full: [{
+                name: "Jumping Jacks",
+                time: 30,
+                equipment: "none"
+            }, {
+                name: "Bodyweight Squats",
+                time: 40,
+                equipment: "none"
+            }, {
+                name: "Push-ups",
+                time: 30,
+                equipment: "none"
+            }, {
+                name: "Plank",
+                time: 45,
+                equipment: "none"
+            }],
+            arms: [{
+                name: "Bicep curls",
+                time: 30,
+                equipment: "dumbbells"
+            }, {
+                name: "Tricep dips",
+                time: 30,
+                equipment: "none"
+            }, {
+                name: "Shoulder press",
+                time: 40,
+                equipment: "dumbbells"
+            }],
+            legs: [{
+                name: "Lunges",
+                time: 30,
+                equipment: "none"
+            }, {
+                name: "Calf raises",
+                time: 30,
+                equipment: "none"
+            }, {
+                name: "Glute bridge",
+                time: 40,
+                equipment: "none"
+            }]
+        };
+
+        function randomPlan(part, equipment) {
+            const pool = WORKOUTS[part].filter(w => equipment === 'none' ? true : w.equipment === equipment);
+
+            const chosen = [];
+            for (let i = 0; i < 3; i++) {
+                chosen.push(pool[Math.floor(Math.random() * pool.length)]);
+            }
+            return chosen;
+        }
+
+        function renderPlan(plan) {
+            const el = document.getElementById('plan');
+            el.innerHTML = '<h4>Your plan</h4>' + plan.map((p, i) => `<div class="card"><strong>${i+1}. ${p.name}</strong><p>${p.time}s</p><button data-idx="${i}" class="btn start-ex">Start</button></div>`).join('');
+
+            document.querySelectorAll('.start-ex').forEach(b => {
+                b.addEventListener('click', e => {
+                    const idx = Number(e.target.dataset.idx);
+                    startTimer(plan[idx].time, plan[idx].name);
+                });
+            });
+        }
+
+        let timerRef = null;
+
+        function startTimer(seconds, label) {
+            clearInterval(timerRef);
+            const el = document.getElementById('timer');
+            let s = seconds;
+            el.innerHTML = `<div class="card"><h4>${label}</h4><p id="count">${s}s</p></div>`;
+            timerRef = setInterval(() => {
+                s--;
+                document.getElementById('count').innerText = s + 's';
+                if (s <= 0) {
+                    clearInterval(timerRef);
+                    showMessage('Exercise complete!');
+                }
+            }, 1000);
+        }
+
+        document.getElementById('gen-btn').addEventListener('click', () => {
+            const part = document.getElementById('bodypart').value;
+            const equipment = document.getElementById('equipment').value;
+            const plan = randomPlan(part, equipment);
+            renderPlan(plan);
+        });
+    </script>
+</body>
+
+</html>

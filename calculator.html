@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>GreenBite — Calculator</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container nav">
+            <div class="brand">GreenBite</div>
+            <nav class="nav-links">
+                <a href="index.html">Home</a><a href="recipes.html">Recipes</a><a href="calculator.html">Calculator</a>
+            </nav><button class="hamburger btn">☰</button></div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Calorie & Nutrition Calculator</h2>
+            <div class="form-row">
+                <input id="age" type="number" placeholder="Age (years)" class="input">
+                <select id="gender" class="input"><option value="male">Male</option><option value="female">Female</option></select>
+                <input id="height" type="number" placeholder="Height (cm)" class="input">
+                <input id="weight" type="number" placeholder="Weight (kg)" class="input">
+                <select id="activity" class="input">
+          <option value="1.2">Sedentary (1.2)</option>
+          <option value="1.375">Light (1.375)</option>
+          <option value="1.55">Moderate (1.55)</option>
+          <option value="1.725">Very active (1.725)</option>
+          <option value="1.9">Super active (1.9)</option>
+        </select>
+            </div>
+            <div style="margin-top:10px"><button id="calc-btn" class="btn">Calculate</button></div>
+
+            <div id="results" style="margin-top:14px;display:none" class="card">
+                <h3>Results</h3>
+                <p id="bmr"></p>
+                <p id="tdee"></p>
+                <div id="macros"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        function calcBMR({
+            weight,
+            height,
+            age,
+            gender
+        }) {
+            if (gender === 'male') {
+                return 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                return 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+        }
+
+        function showResults(bmr, tdee) {
+            document.getElementById('bmr').innerText = 'BMR: ' + formatNum(bmr) + ' kcal/day';
+            document.getElementById('tdee').innerText = 'TDEE: ' + formatNum(tdee) + ' kcal/day';
+
+            const carbsG = (tdee * 0.5) / 4;
+            const proteinG = (tdee * 0.2) / 4;
+            const fatG = (tdee * 0.3) / 9;
+            document.getElementById('macros').innerHTML = `
+        <p>Carbs: ${formatNum(carbsG)} g • Protein: ${formatNum(proteinG)} g • Fat: ${formatNum(fatG)} g</p>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;background:#eee;padding:6px;border-radius:8px">
+            <div style="width:${50}%;height:10px;background:var(--accent);border-radius:6px"></div>
+            <small>Carbs 50%</small>
+          </div>
+          <div style="flex:1;background:#eee;padding:6px;border-radius:8px">
+            <div style="width:${20}%;height:10px;background:#f4a261;border-radius:6px"></div>
+            <small>Protein 20%</small>
+          </div>
+          <div style="flex:1;background:#eee;padding:6px;border-radius:8px">
+            <div style="width:${30}%;height:10px;background:#9b5de5;border-radius:6px"></div>
+            <small>Fat 30%</small>
+          </div>
+        </div>
+      `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        document.getElementById('calc-btn').addEventListener('click', () => {
+            const age = Number(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = Number(document.getElementById('height').value);
+            const weight = Number(document.getElementById('weight').value);
+            const activity = Number(document.getElementById('activity').value);
+
+            if (!age || !height || !weight) return showMessage('Please enter valid age, height and weight');
+            const bmr = calcBMR({
+                weight,
+                height,
+                age,
+                gender
+            });
+            const tdee = bmr * activity;
+            showResults(bmr, tdee);
+        });
+    </script>
+</body>
+
+</html>

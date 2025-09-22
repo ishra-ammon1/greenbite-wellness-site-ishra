@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Mindfulness</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .breath {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #e6fff2, #d0f7e6)
+        }
+        
+        .breath.shrink {
+            transform: scale(.6);
+            transition: 3s ease-in-out
+        }
+        
+        .breath.grow {
+            transform: scale(1.1);
+            transition: 3s ease-in-out
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container nav">
+            <div class="brand">GreenBite</div>
+            <nav class="nav-links">
+                <a href="index.html">Home</a><a href="mindfulness.html">Mindfulness</a><a href="workouts.html">Workouts</a>
+            </nav><button class="hamburger btn">☰</button></div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Breathing Exercise</h2>
+            <div id="breath" class="breath grow">Breathe</div>
+            <div style="display:flex;gap:8px;justify-content:center">
+                <button id="start-breath" class="btn">Start 3-cycle</button>
+                <button id="stop-breath" class="btn">Stop</button>
+            </div>
+            <hr>
+            <h3>Ambient sound</h3>
+            <button id="play-ambient" class="btn">Toggle ambient</button>
+            <p id="session-count">Completed sessions: 0</p>
+        </section>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        const breathEl = document.getElementById('breath');
+        let breathTimer = null;
+        let cyclesDone = 0;
+
+        function startBreathing(cycles = 3) {
+            cyclesDone = 0;
+            runCycle();
+        }
+
+        function runCycle() {
+
+            breathEl.classList.remove('grow', 'shrink');
+
+            breathEl.classList.add('grow');
+            setTimeout(() => { /* hold */ }, 4000);
+            setTimeout(() => {
+                breathEl.classList.remove('grow');
+                breathEl.classList.add('shrink')
+            }, 6000);
+            setTimeout(() => {
+                cyclesDone++;
+                if (cyclesDone < 3) {
+                    runCycle();
+                } else {
+                    showMessage('Breathing complete');
+
+                    const done = LS.get('mb_sessions', 0) || 0;
+                    LS.set('mb_sessions', done + 1);
+                    document.getElementById('session-count').innerText = 'Completed sessions: ' + (done + 1);
+                }
+            }, 10000);
+        }
+
+        document.getElementById('start-breath').addEventListener('click', () => startBreathing(3));
+        document.getElementById('stop-breath').addEventListener('click', () => {
+            breathEl.classList.remove('grow', 'shrink');
+        });
+
+
+        const audio = new Audio('assets/images/ambient.mp3');
+        audio.loop = true;
+        document.getElementById('play-ambient').addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().catch(() => showMessage('Playback blocked by browser'));
+                document.getElementById('play-ambient').innerText = 'Stop ambient';
+            } else {
+                audio.pause();
+                document.getElementById('play-ambient').innerText = 'Play ambient';
+            }
+        });
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const done = LS.get('mb_sessions', 0) || 0;
+            document.getElementById('session-count').innerText = 'Completed sessions: ' + done;
+        });
+    </script>
+</body>
+
+</html>
